@@ -8,6 +8,7 @@
 
 from pathlib import Path
 import math
+import csv
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score
 import numpy as np
@@ -114,6 +115,26 @@ def gaussian(row, target, ms, pc):
 
     return pred, prob/tgaus, acc
 
+def confuse(predict, actual, accuracy):
+    unique, _ = np.unique(actual, return_counts = True)
+    matrix = np.zeros((len(unique), len(unique)))
+
+    for i in range(len(predict)):
+        matrix[ int(predict[i]) ][ int(actual[i]) ] += 1
+
+    np.set_printoptions(suppress = True)
+    print("\nConfusion Matrix")
+    print(matrix, "\n")
+
+    with open('results.csv', 'a') as csvFile:
+        w = csv.writer(csvFile)
+        w.writerow([])
+        w.writerow(["Confusion Matrix"])
+        for k in range(len(unique)):
+            w.writerow(matrix[k,:])
+        w.writerow(["Final Accuracy"] + [accuracy])
+        w.writerow([])
+
 if __name__ == '__main__':
 
     # Load data.
@@ -164,3 +185,5 @@ if __name__ == '__main__':
 
     print('precision: %f' % precision)
     print('recall: %f' % recall)
+
+    confuse(YPredict, YTest, accuracy)
