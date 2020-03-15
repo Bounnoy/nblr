@@ -178,7 +178,8 @@ if __name__ == '__main__':
 
         YPredict = np.append(YPredict, pred)
 
-    print("classification accuracy=" + '%6.4f' % (accuracy/len(XTest)*100))
+    accuracy = accuracy / len(XTest)*100
+    print("classification accuracy=" + '%6.4f' % accuracy)
 
     precision = precision_score(YTest, YPredict)
     recall = recall_score(YTest, YPredict)
