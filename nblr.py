@@ -18,7 +18,9 @@ import random
 def prob(data, label):
     unique, count = np.unique(data, return_counts = True)
     A = dict(zip(unique, count))
+
     total = 0.0
+
     for value in A.values():
         total += value
 
@@ -30,8 +32,8 @@ def computeMS(dataX, dataY):
     data = data[data[:,(len(data[0])-1)].argsort()]             # Sort by class.
 
     unique, count = np.unique(dataY, return_counts = True)
-    features = len(dataX[0])   # Number of features.
-    classes = len(unique)   # Number of classes.
+    features = len(dataX[0])    # Number of features.
+    classes = len(unique)       # Number of classes.
 
     # List of mean, standard deviation, and class.
     ms = np.zeros((classes, features, 3))
@@ -77,10 +79,10 @@ def gaussian(row, target, ms, pc):
         for j in range(len(ms[0])):
             mean = ms[i][j][0]        # Extract the mean from our training list.
             std = ms[i][j][1]         # Extract the standard deviation from our training list.
+            x = (row[j] - mean) / std # Subcalculation for exponent.
 
-            x = (row[j] - mean) / std                                   # Subcalculation for exponent.
-            calc = math.exp(-x*x/2.0) / (math.sqrt(2.0*math.pi * std * std))  # Calculate full gaussian.
-            gaus += math.log(max(calc, 1.0e-250))#0.00000000000000000000000000000000000000000000000000000000000000000001))# if calc > 0 else 0.0                # Log results to prevent underflow.
+            calc = math.exp(-x*x/2.0) / (math.sqrt(2.0*math.pi * std * std))    # Calculate full gaussian.
+            gaus += math.log(max(calc, 1.0e-250))                               # Log results to prevent underflow.
 
         gaus += math.log(pc[i]) # Add probability(class).
         gaus = math.exp(gaus)   # Raise the results back so they're non-negative.
@@ -93,6 +95,7 @@ def gaussian(row, target, ms, pc):
 
         else:
             prob = max(prob, gaus)
+
             # If the new gaussian is highest, make it the new predicted class.
             # Else, keep old prediction.
             pred = ms[i][0][2] if math.isclose(prob, gaus) else pred
@@ -115,10 +118,13 @@ def gaussian(row, target, ms, pc):
 
     return pred, prob/tgaus, acc
 
+# This function creates a confusion matrix and outputs results
+# to the console and to a 'results.csv' file.
 def confuse(predict, actual, accuracy):
     unique, _ = np.unique(actual, return_counts = True)
     matrix = np.zeros((len(unique), len(unique)))
 
+    # Plot results of our classifier into matrix.
     for i in range(len(predict)):
         matrix[ int(predict[i]) ][ int(actual[i]) ] += 1
 
@@ -166,10 +172,9 @@ if __name__ == '__main__':
 
     # Classify test data.
     accuracy = 0
-
     YPredict = np.array([])
 
-    # Rows in Test Data
+    # Compute gaussian and other metrics for each row in test data.
     for i in range(len(YTest)):
         pred, prob, acc = gaussian(XTest[i], YTest[i], ms, pc)
         truth = YTest[i]
